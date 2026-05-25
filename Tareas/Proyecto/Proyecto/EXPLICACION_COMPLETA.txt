@@ -1,0 +1,955 @@
+╔══════════════════════════════════════════════════════════════════════════════════╗
+║          EXPLICACIÓN COMPLETA DEL PROYECTO BICITAXI DASHBOARD                  ║
+║          Para alguien que está aprendiendo a programar desde cero               ║
+╚══════════════════════════════════════════════════════════════════════════════════╝
+
+  Escrito en español sencillo, sin palabras complicadas innecesarias.
+  Si algo no se entiende, busca el término en Google o pregunta a tu maestro.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+
+ÍNDICE
+──────
+  1. ¿Qué construimos y para qué sirve?
+  2. Las tecnologías que usamos (el "material de construcción")
+  3. ¿Qué es Docker y por qué lo necesitamos?
+  4. ¿Qué es Node.js y para qué sirve?
+  5. ¿Qué es Nginx y cómo funciona?
+  6. La estructura de carpetas explicada
+  7. Cómo funciona la Base de Datos (PostgreSQL)
+  8. Cómo programamos el Backend (Node.js + Express)
+  9. Cómo programamos el Frontend (React)
+ 10. Cómo conectamos todo con Docker Compose
+ 11. El flujo completo: ¿qué pasa cuando el usuario hace Login?
+ 12. Resumen de todos los archivos importantes
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+1. ¿QUÉ CONSTRUIMOS Y PARA QUÉ SIRVE?
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  Construimos un sistema web para administrar bicitaxis.
+
+  Imagina que eres el dueño de una empresa que tiene muchos bicitaxis
+  (bicicletas de carga que se usan como taxi). Necesitas:
+
+    ✔ Saber cuántos bicitaxis tienes
+    ✔ Saber cuáles están activos, cuáles en reparación o inactivos
+    ✔ Registrar revisiones técnicas (¿están bien los frenos? ¿las llantas?)
+    ✔ Ver quién es el dueño de cada uno y su teléfono
+    ✔ Tener usuarios con contraseña para que solo empleados puedan entrar
+
+  Todo eso lo hace este sistema desde un navegador web (Chrome, Firefox, etc.)
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+2. LAS TECNOLOGÍAS QUE USAMOS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  Piensa en construir una casa. Necesitas:
+    - Los ladrillos (el lenguaje de programación)
+    - El plano (la estructura del proyecto)
+    - Las herramientas (los programas que usamos para construir)
+
+  Estas son nuestras "herramientas y materiales":
+
+  ┌─────────────────┬──────────────────────────────────────────────────────────┐
+  │ Tecnología      │ Para qué sirve (en palabras simples)                     │
+  ├─────────────────┼──────────────────────────────────────────────────────────┤
+  │ React           │ La parte que ve el usuario (botones, formularios, tablas)│
+  │ Vite            │ Herramienta que convierte el código React en una página  │
+  │ TailwindCSS     │ Le da estilo y colores a la página (como CSS pero fácil) │
+  │ Node.js         │ Ejecuta código JavaScript en el servidor (ver sección 4) │
+  │ Express         │ Librería para crear rutas de la API fácilmente           │
+  │ PostgreSQL      │ Base de datos donde guardamos toda la información        │
+  │ JWT             │ Sistema de "pase de acceso" para usuarios logueados      │
+  │ bcryptjs        │ Convierte contraseñas en texto cifrado (seguridad)       │
+  │ Nginx           │ El "portero" del sistema (ver sección 5)                 │
+  │ Docker          │ "Cajas" que contienen cada parte del sistema (sección 3) │
+  └─────────────────┴──────────────────────────────────────────────────────────┘
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+3. ¿QUÉ ES DOCKER Y POR QUÉ LO NECESITAMOS?
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ANALOGÍA FÁCIL:
+  ────────────────
+  Imagina que preparas una receta de cocina.
+  Necesitas ingredientes: harina, huevos, leche, azúcar.
+
+  El problema: en tu casa tienes harina de marca A, pero en la casa de tu amigo
+  tiene harina de marca B. La receta puede salir diferente.
+
+  Docker resuelve eso. Es como empacar TODOS los ingredientes exactos en una caja
+  hermética. Cuando tu amigo abra la caja, tendrá exactamente lo mismo que tú.
+  La receta siempre saldrá igual, sin importar en qué computadora se corra.
+
+  ¿QUÉ ES UN "CONTENEDOR"?
+  ─────────────────────────
+  Un contenedor Docker es una "mini computadora" que vive dentro de tu computadora.
+  Tiene su propio sistema operativo pequeño, sus propios programas instalados y
+  su propia configuración. No interfiere con lo demás de tu computadora.
+
+  En este proyecto tenemos 4 contenedores (4 "mini computadoras"):
+
+    ┌─────────────────────────────────────────────────────────────────┐
+    │  [Contenedor 1]  BASE DE DATOS (PostgreSQL) - Puerto 5432       │
+    │  → Guarda toda la información: usuarios, vehículos, revisiones  │
+    ├─────────────────────────────────────────────────────────────────┤
+    │  [Contenedor 2]  BACKEND (Node.js) - Puerto 4000                │
+    │  → Procesa las peticiones, verifica contraseñas, consulta la BD │
+    ├─────────────────────────────────────────────────────────────────┤
+    │  [Contenedor 3]  FRONTEND (React) - Puerto 3000                 │
+    │  → Sirve la página web que ve el usuario                        │
+    ├─────────────────────────────────────────────────────────────────┤
+    │  [Contenedor 4]  NGINX - Puerto 8000 (el que abre el público)   │
+    │  → El "portero" que recibe todo y lo dirige al lugar correcto   │
+    └─────────────────────────────────────────────────────────────────┘
+
+  ¿QUÉ ES UN "Dockerfile"?
+  ─────────────────────────
+  Es la "receta" de cómo construir cada contenedor.
+  Le dice a Docker paso a paso:
+    - Qué sistema base usar (por ej. "empieza con Ubuntu pequeño")
+    - Qué programas instalar
+    - Qué archivos copiar
+    - Qué comando ejecutar cuando el contenedor arranque
+
+  Ejemplo del Dockerfile del backend (explicado línea por línea):
+
+    FROM node:18-alpine
+    → "Empieza con una computadora que ya tiene Node.js versión 18 instalado"
+    → "alpine" significa que es una versión muy pequeña de Linux (liviana)
+
+    WORKDIR /app
+    → "Dentro del contenedor, trabaja en la carpeta /app"
+    → Es como hacer "cd /app" pero al construir la imagen
+
+    COPY package*.json ./
+    → "Copia los archivos package.json al contenedor"
+    → Estos archivos listan todas las librerías que necesitamos
+
+    RUN npm install --production
+    → "Instala todas las librerías listadas en package.json"
+    → --production significa que no instala las de desarrollo
+
+    COPY . .
+    → "Copia todo el código fuente al contenedor"
+
+    EXPOSE 4000
+    → "Este contenedor usa el puerto 4000"
+    → Es solo informativo, no abre el puerto solo
+
+    CMD ["node", "src/index.js"]
+    → "Cuando arranque el contenedor, ejecuta este comando"
+    → Inicia el servidor backend
+
+  ¿QUÉ ES docker-compose.yml?
+  ────────────────────────────
+  Es el archivo "director de orquesta". Le dice a Docker:
+    - Cuáles contenedores crear
+    - Cómo conectarlos entre sí
+    - Qué variables de entorno darles (contraseñas, puertos, etc.)
+    - En qué orden arrancarlos
+
+  Nota importante: El orden importa.
+  La base de datos debe arrancar ANTES que el backend, porque el backend
+  necesita conectarse a ella. Lo manejamos con "depends_on" y "healthcheck".
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+4. ¿QUÉ ES NODE.JS Y PARA QUÉ SIRVE?
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ANALOGÍA FÁCIL:
+  ────────────────
+  Cuando programas en JavaScript, normalmente ese código solo corre
+  DENTRO del navegador (Chrome, Firefox). Es decir, en la computadora del usuario.
+
+  Node.js es como sacar JavaScript del navegador y dejarlo correr directamente
+  en el servidor (una computadora sin pantalla que está en internet).
+
+  Antes de Node.js:
+    - Frontend (navegador)  → JavaScript
+    - Backend (servidor)    → PHP, Java, Python, Ruby...
+
+  Con Node.js:
+    - Frontend (navegador)  → JavaScript
+    - Backend (servidor)    → JavaScript también ✔
+
+  Esto es MUY útil porque aprendes UN solo lenguaje y puedes hacer las DOS partes.
+
+  ¿QUÉ ES "npm"?
+  ───────────────
+  npm = Node Package Manager (Administrador de Paquetes de Node).
+  Es como una "tienda de librerías gratuitas".
+
+  Cuando programas, no tienes que inventar todo desde cero.
+  Alguien ya programó cómo conectarse a PostgreSQL → librería "pg"
+  Alguien ya programó cómo hacer rutas web → librería "express"
+  Alguien ya programó cómo cifrar contraseñas → librería "bcryptjs"
+
+  Para instalar una librería solo escribes:
+    npm install nombre-de-libreria
+
+  El archivo package.json lista todas las librerías que necesita tu proyecto:
+
+    "dependencies": {
+      "express": "^4.18.2",     ← servidor web
+      "pg": "^8.11.3",          ← conexión a PostgreSQL
+      "bcryptjs": "^2.4.3",     ← cifrar contraseñas
+      "jsonwebtoken": "^9.0.2", ← crear tokens de sesión
+      "cors": "^2.8.5",         ← permitir peticiones entre dominios
+      "dotenv": "^16.3.1"       ← leer variables de entorno (.env)
+    }
+
+  ¿QUÉ ES "Express"?
+  ───────────────────
+  Express es una librería de Node.js que facilita crear un servidor web.
+  Sin Express, crear rutas sería muy complicado.
+  Con Express, es así de simple:
+
+    app.get('/api/vehiculos', function(req, res) {
+      res.json({ mensaje: "Aquí van los vehículos" });
+    });
+
+  Eso significa: "Cuando alguien haga una petición GET a /api/vehiculos,
+  respóndele con ese JSON".
+
+  req = request (la petición que llega)
+  res = response (la respuesta que mandamos)
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+5. ¿QUÉ ES NGINX Y CÓMO FUNCIONA?
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ANALOGÍA FÁCIL (la del edificio de oficinas):
+  ──────────────────────────────────────────────
+  Imagina un edificio de oficinas con una recepcionista en la entrada.
+  Cuando llega una persona, la recepcionista pregunta:
+    "¿A qué piso va usted?"
+    - Si va al departamento de ventas → Piso 3
+    - Si va al departamento legal → Piso 5
+    - Si va a informes generales → Planta baja
+
+  Nginx es esa recepcionista. Está en la "puerta" del sistema (puerto 8000)
+  y decide a dónde manda cada petición:
+
+    ┌─────────────────────────────────────────────────────────────┐
+    │  Usuario escribe: http://localhost:8000                     │
+    │                           │                                 │
+    │                    [NGINX - el portero]                     │
+    │                    /              \                         │
+    │    ¿La URL empieza      ¿La URL empieza                     │
+    │    con /api/ ?          con cualquier                       │
+    │         │               otra cosa?                         │
+    │         ↓                    ↓                              │
+    │   Backend:4000          Frontend:3000                       │
+    │  (el servidor)          (la página web)                     │
+    └─────────────────────────────────────────────────────────────┘
+
+  EXPLICACIÓN EN CÓDIGO (nginx.conf):
+  ─────────────────────────────────────
+  Así luce la configuración de Nginx en lenguaje simple:
+
+    location /api/ {           ← "Si la URL empieza con /api/"
+        proxy_pass http://backend;  ← "mándalo al backend (Node.js)"
+    }
+
+    location / {               ← "Para todo lo demás"
+        proxy_pass http://frontend; ← "mándalo al frontend (React)"
+    }
+
+  ¿POR QUÉ NECESITAMOS NGINX?
+  ─────────────────────────────
+  Sin Nginx, el usuario tendría que saber dos direcciones:
+    - Para la página: http://localhost:3000
+    - Para la API:    http://localhost:4000
+
+  Con Nginx, hay UNA sola dirección:
+    - Para todo: http://localhost:8000
+
+  Nginx decide automáticamente a dónde va cada cosa.
+
+  ¿POR QUÉ NGINX TIENE SU PROPIO CONTENEDOR DOCKER?
+  ────────────────────────────────────────────────────
+  Porque en la vida real (en producción, en un servidor de verdad),
+  Nginx vive SEPARADO de tu código. Así puedes:
+    - Cambiar el backend sin tocar Nginx
+    - Escalar el frontend sin tocar Nginx
+    - Actualizar Nginx sin tocar tu código
+
+  Es la buena práctica: cada parte del sistema vive en su propia "caja".
+
+  ¿QUÉ SIGNIFICA "PROXY INVERSO"?
+  ─────────────────────────────────
+  "Proxy" significa intermediario.
+  "Proxy inverso" significa que el intermediario está del lado del SERVIDOR
+  (no del usuario).
+
+  El usuario no sabe que hay un Nginx. Solo ve http://localhost:8000
+  y Nginx silenciosamente redirige la petición al lugar correcto.
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+6. LA ESTRUCTURA DE CARPETAS EXPLICADA
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  Proyecto/
+  │
+  ├── docker-compose.yml   ← El "director" que arranca todo junto
+  ├── .env                 ← Contraseñas y configuraciones secretas (NO se sube a GitHub)
+  ├── .env.example         ← Plantilla del .env (SÍ se sube a GitHub, sin valores reales)
+  │
+  ├── database/            ← TODO lo de la base de datos
+  │   ├── Dockerfile       ← Receta para construir el contenedor PostgreSQL
+  │   └── init.sql         ← El código SQL que crea las tablas y datos de prueba
+  │
+  ├── backend/             ← TODO el servidor (Node.js)
+  │   ├── Dockerfile       ← Receta para construir el contenedor del backend
+  │   ├── package.json     ← Lista de librerías que necesita
+  │   └── src/             ← El código fuente del servidor
+  │       ├── index.js     ← Punto de inicio: arranca el servidor Express
+  │       ├── config/
+  │       │   └── db.js    ← Configura la conexión a PostgreSQL
+  │       ├── routes/      ← Define las URLs disponibles (las "rutas")
+  │       │   ├── auth.routes.js     ← Rutas: /api/auth/login, /api/auth/register
+  │       │   ├── vehicle.routes.js  ← Rutas: /api/vehicles (CRUD)
+  │       │   └── checkup.routes.js  ← Rutas: /api/checkups
+  │       ├── controllers/ ← La lógica de cada ruta (qué hace exactamente)
+  │       │   ├── auth.controller.js
+  │       │   ├── vehicle.controller.js
+  │       │   └── checkup.controller.js
+  │       ├── models/      ← Las consultas a la base de datos (el SQL en JavaScript)
+  │       │   ├── user.model.js
+  │       │   ├── vehicle.model.js
+  │       │   └── checkup.model.js
+  │       └── middleware/  ← Código que se ejecuta ENTRE la petición y la respuesta
+  │           ├── auth.middleware.js   ← Verifica que el usuario tenga un token válido
+  │           └── error.middleware.js  ← Captura errores y los devuelve en formato JSON
+  │
+  ├── frontend/            ← TODO lo que ve el usuario (React)
+  │   ├── Dockerfile       ← Receta en 2 etapas: primero compila, luego sirve
+  │   ├── package.json     ← Lista de librerías del frontend
+  │   ├── vite.config.js   ← Configuración de Vite (el compilador)
+  │   ├── tailwind.config.js ← Configuración de TailwindCSS (los estilos)
+  │   ├── index.html       ← La página HTML base (React se "monta" aquí)
+  │   └── src/
+  │       ├── main.jsx     ← Punto de inicio de React
+  │       ├── App.jsx      ← Define las rutas de la aplicación
+  │       ├── index.css    ← Importa TailwindCSS
+  │       ├── services/
+  │       │   └── api.js   ← Configura Axios para hablar con el backend
+  │       ├── routes/
+  │       │   ├── PublicRoutes.jsx   ← Rutas para NO logueados (Login, Register)
+  │       │   └── PrivateRoutes.jsx  ← Rutas para logueados (Dashboard, etc.)
+  │       ├── pages/
+  │       │   ├── public/
+  │       │   │   ├── Login.jsx     ← Página de inicio de sesión
+  │       │   │   └── Register.jsx  ← Página de registro
+  │       │   └── private/
+  │       │       ├── Dashboard.jsx     ← Página principal con estadísticas
+  │       │       ├── Vehicles.jsx      ← Lista de vehículos con CRUD
+  │       │       ├── VehicleDetail.jsx ← Detalle de un vehículo + revisiones
+  │       │       └── Checkup.jsx       ← Formulario de nueva revisión
+  │       └── components/  ← Piezas reutilizables de la interfaz
+  │           ├── Navbar.jsx      ← Barra de navegación superior
+  │           ├── Sidebar.jsx     ← Menú lateral
+  │           ├── VehicleCard.jsx ← Tarjeta de vehículo
+  │           └── CheckupForm.jsx ← Formulario de revisión
+  │
+  └── nginx/               ← La configuración del portero
+      ├── Dockerfile        ← Receta del contenedor Nginx
+      └── nginx.conf        ← Las reglas de redirección
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+7. CÓMO FUNCIONA LA BASE DE DATOS (PostgreSQL)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ¿QUÉ ES UNA BASE DE DATOS?
+  ────────────────────────────
+  Es como una hoja de cálculo de Excel, pero mucho más poderosa.
+  Guarda información de forma organizada en TABLAS.
+  Cada tabla tiene filas (registros) y columnas (campos).
+
+  ¿QUÉ ES SQL?
+  ─────────────
+  SQL = Structured Query Language (Lenguaje de Consulta Estructurado)
+  Es el idioma para hablar con la base de datos. Por ejemplo:
+
+    "Dame todos los vehículos activos":
+    SELECT * FROM vehicles WHERE status = 'active';
+
+    "Agrega este nuevo vehículo":
+    INSERT INTO vehicles (plate, brand) VALUES ('BT-001', 'VeloTaxi');
+
+    "Elimina el vehículo con id 5":
+    DELETE FROM vehicles WHERE id = 5;
+
+  NUESTRAS TABLAS (en database/init.sql):
+  ─────────────────────────────────────────
+
+  TABLA "users" (usuarios del sistema):
+  ┌────┬───────────────┬──────────────────────┬──────────────────┬──────────┐
+  │ id │ name          │ email                │ password_hash    │ role     │
+  ├────┼───────────────┼──────────────────────┼──────────────────┼──────────┤
+  │  1 │ Administrador │ admin@bicitaxi.com   │ $2b$10$Uu.Gq5.. │ admin    │
+  │  2 │ Test User     │ test@bicitaxi.com    │ $2b$10$xyz...   │ operator │
+  └────┴───────────────┴──────────────────────┴──────────────────┴──────────┘
+  Nota: La contraseña NO se guarda como texto normal ("admin123").
+  Se guarda cifrada ("$2b$10$Uu.Gq5..."). Eso es bcrypt (explicado abajo).
+
+  TABLA "vehicles" (los bicitaxis):
+  ┌────┬────────┬──────────┬──────────┬──────┬───────┬────────┐
+  │ id │ plate  │ model    │ brand    │ year │ color │ status │
+  ├────┼────────┼──────────┼──────────┼──────┼───────┼────────┤
+  │  1 │ BT-001 │ CargoPro │ TaxiCycl │ 2021 │ Amari │ active │
+  │  2 │ BT-002 │ UrbanX   │ VeloTaxi │ 2022 │ Verde │ active │
+  └────┴────────┴──────────┴──────────┴──────┴───────┴────────┘
+
+  TABLA "checkups" (revisiones técnicas):
+  ┌────┬────────────┬─────────────┬────────┬────────┬───────────────┐
+  │ id │ vehicle_id │ inspector_id│ brakes │ lights │ overall_status│
+  ├────┼────────────┼─────────────┼────────┼────────┼───────────────┤
+  │  1 │     1      │      1      │  good  │  good  │   approved    │
+  └────┴────────────┴─────────────┴────────┴────────┴───────────────┘
+
+  RELACIONES ENTRE TABLAS (las "llaves foráneas"):
+  ─────────────────────────────────────────────────
+  La tabla checkups tiene vehicle_id y inspector_id.
+  Esto significa que APUNTA a las otras tablas:
+    - vehicle_id = 1 significa "este checkup es del vehículo con id 1"
+    - inspector_id = 1 significa "lo hizo el usuario con id 1"
+
+  Es como decir: en vez de repetir "BT-001, VeloTaxi, Verde, 2022..."
+  en cada checkup, solo guardamos el número "1" y PostgreSQL sabe
+  que tiene que buscar los detalles en la tabla vehicles.
+
+  CÓMO SE CREA LA BASE DE DATOS AUTOMÁTICAMENTE:
+  ─────────────────────────────────────────────────
+  El archivo database/init.sql se ejecuta automáticamente cuando
+  el contenedor de PostgreSQL arranca por PRIMERA VEZ.
+  Crea las tablas y agrega los datos de prueba (5 vehículos + 1 admin).
+
+  ¿QUÉ ES UN "VOLUMEN" EN DOCKER?
+  ─────────────────────────────────
+  Si pagas en un hotel y limpian tu habitación, si guardas tus cosas
+  en la caja fuerte, siguen ahí. Pero si no guardas nada, al irte
+  la habitación queda vacía.
+
+  Un contenedor Docker es como esa habitación: por defecto, si
+  lo "apagas" (docker compose down), pierdes todos los datos.
+
+  Un volumen es la "caja fuerte". Guardamos los datos de PostgreSQL
+  en un volumen llamado "postgres_data":
+
+    volumes:
+      postgres_data:
+
+  Así, aunque reinicies los contenedores, los datos siguen ahí.
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+8. CÓMO PROGRAMAMOS EL BACKEND (Node.js + Express)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  El backend es el "cerebro" del sistema. El usuario NUNCA lo ve,
+  pero hace todo el trabajo importante:
+    - Verificar contraseñas
+    - Consultar la base de datos
+    - Proteger información privada
+
+  PATRÓN MVC (Modelo - Vista - Controlador):
+  ───────────────────────────────────────────
+  Organizamos el código en 3 capas. Es como una cocina de restaurante:
+
+    RUTAS (routes/) = El mesero
+    → Recibe el pedido del cliente y lo lleva a la cocina
+    → Ejemplo: "Alguien hizo POST a /api/auth/login"
+
+    CONTROLADORES (controllers/) = El chef
+    → Procesa el pedido y decide qué hacer
+    → Ejemplo: "Verificar contraseña, crear token, responder"
+
+    MODELOS (models/) = El almacén
+    → Va a buscar o guardar ingredientes (datos de la BD)
+    → Ejemplo: "SELECT * FROM users WHERE email = 'x'"
+
+  FLUJO DE UNA PETICIÓN:
+  ──────────────────────
+    Usuario hace click en "Login"
+          ↓
+    Petición llega a Nginx
+          ↓
+    Nginx la manda al Backend (por ser /api/)
+          ↓
+    auth.routes.js la recibe y llama al controlador
+          ↓
+    auth.controller.js verifica la contraseña con bcrypt
+          ↓
+    user.model.js busca el usuario en la BD
+          ↓
+    Si todo está bien, se crea un JWT (token)
+          ↓
+    Se responde al usuario con el token
+
+  ¿QUÉ ES JWT (JSON Web Token)?
+  ──────────────────────────────
+  ANALOGÍA: Imagina que entras a un parque de diversiones.
+  Al entrar, te dan una pulsera con tu nombre y accesos.
+  Para entrar a cada atracción, muestras la pulsera.
+  No tienes que volver a la entrada cada vez para que te identifiquen.
+
+  JWT funciona igual:
+    1. El usuario hace Login con email + contraseña
+    2. El servidor verifica que son correctos
+    3. El servidor crea un "token" (una cadena de texto larga) y lo manda
+    4. El navegador guarda ese token
+    5. En cada petición siguiente, manda el token en la cabecera
+    6. El servidor verifica el token y sabe quién eres
+
+  El token luce así (no tiene datos visibles directamente, está codificado):
+    eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiZW1...
+
+  ¿QUÉ ES bcrypt?
+  ────────────────
+  PROBLEMA: Si guardas contraseñas en texto normal en la BD ("admin123"),
+  y alguien hackea tu BD, conoce todas las contraseñas. ¡Peligroso!
+
+  SOLUCIÓN: bcrypt convierte "admin123" en algo como:
+    "$2b$10$Uu.Gq53Lb4m2IULz08tttOUvPzt9lUDgaaOk..UHjdPLj4Sn3xfRe"
+
+  Eso se llama "hash". Es una transformación de una sola vía:
+    - "admin123" → "$2b$10$Uu.Gq5..." (siempre igual)
+    - "$2b$10$Uu.Gq5..." → no puedes saber que era "admin123"
+
+  Cuando alguien hace login:
+    1. Escribe "admin123"
+    2. bcrypt convierte "admin123" en hash
+    3. Compara el hash con el que está en la BD
+    4. Si coinciden, la contraseña es correcta
+
+  ¿QUÉ ES UN "MIDDLEWARE"?
+  ─────────────────────────
+  Es código que se ejecuta EN MEDIO del camino de la petición.
+  Como un filtro: la petición pasa por él antes de llegar al destino.
+
+  Tenemos dos middlewares:
+
+  auth.middleware.js → Verifica el token JWT.
+  Antes de que cualquier ruta protegida responda, este middleware
+  comprueba: "¿Trae la petición un token válido?"
+    - Si SÍ → deja pasar
+    - Si NO → responde con error 401 (No autorizado)
+
+  error.middleware.js → Captura errores.
+  Si algo falla en el servidor, este middleware lo atrapa y devuelve
+  una respuesta JSON clara en lugar de que el servidor se caiga.
+
+  ¿QUÉ SON LAS "VARIABLES DE ENTORNO" y el archivo .env?
+  ────────────────────────────────────────────────────────
+  Son configuraciones que cambian según el entorno (desarrollo, producción).
+  Por ejemplo:
+    - En tu computadora, la BD está en "localhost"
+    - En un servidor real, la BD está en "db.miempresa.com"
+
+  El archivo .env guarda esos valores:
+    DB_USER=bicitaxi
+    DB_PASS=supersecretpassword
+    JWT_SECRET=una_clave_muy_larga_y_secreta
+
+  Con la librería "dotenv", Node.js lee ese archivo al iniciar:
+    require('dotenv').config();
+    // Ahora puedes usar: process.env.DB_USER, process.env.JWT_SECRET, etc.
+
+  MUY IMPORTANTE: el archivo .env NO se sube a GitHub porque contiene
+  contraseñas reales. Por eso existe .env.example con valores de ejemplo.
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+9. CÓMO PROGRAMAMOS EL FRONTEND (React)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ¿QUÉ ES REACT?
+  ───────────────
+  React es una librería de JavaScript para construir interfaces web.
+  Lo creó Facebook. La idea principal es dividir la página en COMPONENTES.
+
+  ANALOGÍA: Piensa en una página web como un Lego.
+  Cada pieza de Lego es un componente:
+    - Un botón → componente <Button>
+    - Una tarjeta de vehículo → componente <VehicleCard>
+    - El menú lateral → componente <Sidebar>
+    - Toda la barra de arriba → componente <Navbar>
+
+  Ventaja: puedes reutilizar piezas. La tarjeta <VehicleCard> la usas
+  tantas veces como vehículos tengas, sin repetir código.
+
+  ¿QUÉ ES JSX?
+  ─────────────
+  En React, los componentes escriben HTML dentro de JavaScript.
+  Eso se llama JSX. Parece raro al principio, pero es muy útil:
+
+    function Boton({ texto }) {
+      return (
+        <button className="bg-blue-600 text-white px-4 py-2">
+          {texto}
+        </button>
+      );
+    }
+
+  El "className" es igual al "class" de HTML normal (lo cambiaron porque
+  "class" es una palabra reservada en JavaScript).
+
+  ¿QUÉ ES VITE?
+  ──────────────
+  Vite es la herramienta que toma todo tu código React (decenas de archivos)
+  y lo convierte en unos pocos archivos JavaScript que el navegador entiende.
+  También tiene un servidor de desarrollo con recarga automática.
+
+  ¿QUÉ ES TailwindCSS?
+  ─────────────────────
+  Es una forma de darle estilos a la página SIN escribir CSS separado.
+  En vez de:
+    .mi-boton { background-color: blue; color: white; padding: 8px 16px; }
+
+  Escribes directamente en el HTML:
+    <button className="bg-blue-600 text-white px-4 py-2">
+
+  Cada clase hace UNA sola cosa:
+    bg-blue-600 → fondo azul
+    text-white  → texto blanco
+    px-4        → padding horizontal de 16px
+    py-2        → padding vertical de 8px
+
+  ¿QUÉ ES REACT ROUTER?
+  ──────────────────────
+  Las páginas web normales cambian de URL y el servidor entrega un HTML diferente.
+  React es una SPA (Single Page Application = Aplicación de Una Sola Página).
+  El servidor solo manda UN HTML, y JavaScript cambia lo que se muestra.
+
+  React Router simula que hay varias páginas:
+    - URL /login    → muestra el componente <Login>
+    - URL /dashboard → muestra el componente <Dashboard>
+    - URL /vehicles  → muestra el componente <Vehicles>
+
+  RUTAS PROTEGIDAS (PrivateRoutes y PublicRoutes):
+  ─────────────────────────────────────────────────
+  No queremos que alguien entre a /dashboard sin haber hecho Login.
+  Las PrivateRoutes revisan si hay un token guardado:
+
+    function PrivateRoutes() {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        return <Redirigir a="/login" />;
+      }
+      return <MostrarContenido />;
+    }
+
+  localStorage es un "cajón de memoria" del navegador donde podemos
+  guardar pequeñas cantidades de texto (como el token JWT).
+
+  ¿QUÉ ES AXIOS?
+  ───────────────
+  Axios es una librería para hacer peticiones HTTP desde JavaScript.
+  HTTP son las "peticiones" que un navegador hace a un servidor.
+
+  Tipos de peticiones HTTP:
+    GET    → Pedir información ("dame la lista de vehículos")
+    POST   → Enviar información nueva ("crea este nuevo vehículo")
+    PUT    → Actualizar información ("cambia el estado a 'inactivo'")
+    DELETE → Borrar información ("elimina este vehículo")
+
+  Ejemplo de uso:
+    const respuesta = await api.get('/vehicles');
+    console.log(respuesta.data); // [{ id:1, plate:'BT-001' }, ...]
+
+  Nuestro archivo api.js configura Axios con:
+    1. La URL base (/api) para no repetirla en cada llamada
+    2. Un interceptor que agrega el token automáticamente a cada petición
+    3. Un interceptor que redirige a /login si el servidor responde 401
+
+  ¿QUÉ ES UN INTERCEPTOR?
+  ─────────────────────────
+  Es código que se ejecuta ANTES de enviar una petición o DESPUÉS de recibirla.
+  Como un ayudante que revisa tu mochila antes de salir de casa.
+
+  Interceptor de REQUEST (antes de enviar):
+    "Antes de mandar cualquier petición, agrega el token al encabezado"
+    Authorization: Bearer eyJhbGciOiJIUzI1NiI...
+
+  Interceptor de RESPONSE (después de recibir):
+    "Si el servidor responde con 401 (no autorizado),
+     borra el token y manda al usuario a /login"
+
+  EL DOCKERFILE DEL FRONTEND (construcción en 2 etapas):
+  ────────────────────────────────────────────────────────
+  El frontend tiene un Dockerfile especial con 2 fases:
+
+  FASE 1 - Compilar (el "taller"):
+    FROM node:18-alpine AS builder   ← "Usa Node.js para construir"
+    RUN npm install                  ← "Instala todas las librerías"
+    RUN npm run build                ← "Compila el código React"
+    → Resultado: una carpeta "dist/" con archivos HTML, CSS, JS ya optimizados
+
+  FASE 2 - Servir (el "escaparate"):
+    FROM nginx:alpine                        ← "Ahora usa solo Nginx (muy liviano)"
+    COPY --from=builder /app/dist /usr/share/nginx/html  ← "Copia los archivos compilados"
+    → No necesita Node.js en producción, solo Nginx para servir archivos estáticos
+
+  Esto se llama "multi-stage build" y la ventaja es que la imagen final
+  pesa mucho menos porque no incluye Node.js, solo el resultado final.
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+10. CÓMO CONECTAMOS TODO CON DOCKER COMPOSE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  El archivo docker-compose.yml conecta los 4 contenedores.
+  Vamos a leerlo y entender cada parte:
+
+  ┌──────────────────────────────────────────────────────────────────────┐
+  │  version: '3.9'                                                      │
+  │  → Versión del formato de docker-compose (cada vez se mejora)        │
+  └──────────────────────────────────────────────────────────────────────┘
+
+  ┌──────────────────────────────────────────────────────────────────────┐
+  │  networks:                                                           │
+  │    bicitaxi-net:                                                     │
+  │      driver: bridge                                                  │
+  │                                                                      │
+  │  → Crea una red privada para los contenedores.                       │
+  │    Es como una red WiFi privada. Los contenedores se comunican       │
+  │    entre sí usando sus NOMBRES (backend, frontend, db) en vez de IPs │
+  │    Desde fuera de esa red, nadie puede acceder directamente.         │
+  └──────────────────────────────────────────────────────────────────────┘
+
+  ┌──────────────────────────────────────────────────────────────────────┐
+  │  volumes:                                                            │
+  │    postgres_data:                                                    │
+  │                                                                      │
+  │  → Declara el volumen para guardar los datos de PostgreSQL.          │
+  │    Si bajas los contenedores, los datos persisten.                   │
+  └──────────────────────────────────────────────────────────────────────┘
+
+  SERVICIO: db (la base de datos)
+  ────────────────────────────────
+    db:
+      build: ./database
+      → Construye la imagen usando el Dockerfile de la carpeta "database/"
+
+      container_name: bicitaxi-db
+      → Le da un nombre fácil de recordar
+
+      environment:
+        POSTGRES_USER: ${DB_USER}
+        POSTGRES_PASSWORD: ${DB_PASS}
+        POSTGRES_DB: ${DB_NAME}
+      → Variables de entorno. El ${DB_USER} lee el valor del archivo .env
+        Es como: "usa el usuario que dice el archivo .env"
+
+      volumes:
+        - postgres_data:/var/lib/postgresql/data
+      → Conecta el volumen con la carpeta donde PostgreSQL guarda sus datos
+
+      healthcheck:
+        test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
+        interval: 10s
+        retries: 5
+      → Cada 10 segundos, Docker verifica si la BD está lista.
+        El backend NO arrancará hasta que la BD diga "estoy lista".
+
+  SERVICIO: backend (Node.js)
+  ────────────────────────────
+    depends_on:
+      db:
+        condition: service_healthy
+    → "No arranques el backend hasta que la BD pase el healthcheck"
+      Esto evita que el backend intente conectarse a una BD que aún no existe.
+
+  SERVICIO: frontend (React)
+  ───────────────────────────
+    build:
+      context: ./frontend
+      args:
+        VITE_API_URL: /api
+    → Compila el frontend con la variable VITE_API_URL="/api"
+      React usará /api como base para todas las llamadas al servidor.
+      Al estar detrás de Nginx, /api se convierte en la ruta correcta.
+
+  SERVICIO: nginx (el portero)
+  ─────────────────────────────
+    ports:
+      - "8000:80"
+    → "El puerto 8000 de TU computadora apunta al puerto 80 del contenedor"
+      Tú escribes: http://localhost:8000
+      Nginx escucha en: el puerto 80 del contenedor
+
+  DIAGRAMA COMPLETO DE LA RED:
+  ──────────────────────────────
+
+    Tu computadora
+    ──────────────────────────────────────────────────────────────
+                          Red bicitaxi-net (privada)
+
+    localhost:8000 ──→ [bicitaxi-nginx :80]
+                             │
+                    ┌────────┴────────┐
+                    ↓                 ↓
+              [bicitaxi-backend] [bicitaxi-frontend]
+                 :4000                :3000
+                    ↓
+              [bicitaxi-db]
+                 :5432
+
+    Los puertos 3000, 4000, 5432 también están abiertos al exterior
+    solo para desarrollo/debugging. En producción real, solo estaría
+    abierto el puerto de Nginx.
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+11. EL FLUJO COMPLETO: ¿QUÉ PASA CUANDO EL USUARIO HACE LOGIN?
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  Paso a paso, desde que el usuario escribe la URL hasta que ve el dashboard:
+
+  [1] Usuario abre http://localhost:8000/login en el navegador
+
+  [2] La petición llega al contenedor Nginx (puerto 8000→80)
+
+  [3] Nginx ve que la URL es "/" (no empieza con /api/)
+      → La manda al contenedor frontend:3000
+
+  [4] El frontend devuelve el archivo index.html + los archivos JavaScript
+
+  [5] El navegador ejecuta el JavaScript de React
+      React Router ve que la URL es "/login"
+      React muestra el componente <Login>
+
+  [6] El usuario escribe "admin@bicitaxi.com" y "admin123" y hace clic en Login
+
+  [7] React ejecuta:
+        const respuesta = await api.post('/auth/login', {
+          email: 'admin@bicitaxi.com',
+          password: 'admin123'
+        });
+      Axios construye la URL completa: http://localhost:8000/api/auth/login
+
+  [8] La petición POST llega a Nginx
+      Nginx ve que empieza con /api/
+      → La manda al contenedor backend:4000
+
+  [9] El backend (Express) recibe la petición en la ruta:
+        router.post('/login', loginController)
+
+  [10] El controlador auth.controller.js hace:
+        a) Busca el usuario en la BD:
+           SELECT * FROM users WHERE email = 'admin@bicitaxi.com'
+        b) Encuentra el usuario con password_hash = "$2b$10$Uu.Gq5..."
+        c) bcrypt compara "admin123" con ese hash → ¡Coincide!
+        d) Crea un JWT con la información del usuario
+        e) Responde con: { token: "eyJ...", user: { id:1, name:"Administrador"... } }
+
+  [11] El navegador recibe la respuesta
+       React guarda el token en localStorage:
+         localStorage.setItem('token', 'eyJ...')
+         localStorage.setItem('user', JSON.stringify({...}))
+
+  [12] React Router redirige a "/dashboard"
+
+  [13] PrivateRoutes verifica: ¿hay token en localStorage? → SÍ ✔
+       Muestra el componente <Dashboard>
+
+  [14] Dashboard hace peticiones para cargar los datos:
+        api.get('/vehicles')   → GET /api/vehicles
+        api.get('/checkups/latest') → GET /api/checkups/latest
+
+  [15] Axios interceptor agrega automáticamente el token a cada petición:
+        Authorization: Bearer eyJhbGciOiJIUzI1NiI...
+
+  [16] Backend recibe las peticiones, auth.middleware.js verifica el token
+       → Válido ✔ → Los controladores consultan la BD y responden con JSON
+
+  [17] React muestra las estadísticas y la tabla de revisiones en pantalla
+
+  ¡El usuario ya está dentro del sistema!
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+12. RESUMEN DE TODOS LOS ARCHIVOS IMPORTANTES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ARCHIVOS RAÍZ:
+  ───────────────
+  docker-compose.yml  → Director de orquesta: arranca los 4 contenedores
+  .env                → Contraseñas y configuraciones (NO subir a GitHub)
+  .env.example        → Plantilla del .env (SÍ subir a GitHub)
+  README.md           → Documentación del proyecto
+
+  BASE DE DATOS (database/):
+  ──────────────────────────
+  Dockerfile          → FROM postgres:15 + copia el init.sql
+  init.sql            → Crea tablas users, vehicles, checkups + datos de prueba
+
+  BACKEND (backend/src/):
+  ────────────────────────
+  index.js            → Arranca Express, configura CORS, registra las rutas
+  config/db.js        → Crea el "pool" de conexiones a PostgreSQL
+  routes/             → Define qué URLs existen y qué controlador las atiende
+  controllers/        → La lógica: qué hacer con cada petición
+  models/             → Las consultas SQL (el código que habla con la BD)
+  middleware/auth.js  → Verifica el JWT antes de cada ruta protegida
+  middleware/error.js → Atrapa errores y los devuelve en formato JSON
+
+  FRONTEND (frontend/src/):
+  ──────────────────────────
+  main.jsx            → El punto de entrada: "monta" React en el index.html
+  App.jsx             → Define las rutas (qué página mostrar según la URL)
+  services/api.js     → Configura Axios con base URL e interceptores
+  routes/Public.jsx   → Si ya estás logueado, te redirige al dashboard
+  routes/Private.jsx  → Si NO estás logueado, te redirige al login
+  pages/public/       → Login.jsx y Register.jsx (sin protección)
+  pages/private/      → Dashboard, Vehicles, VehicleDetail, Checkup (protegidas)
+  components/         → Navbar, Sidebar, VehicleCard, CheckupForm (reutilizables)
+
+  NGINX (nginx/):
+  ────────────────
+  Dockerfile          → FROM nginx:alpine + copia el nginx.conf
+  nginx.conf          → Las reglas: /api/* → backend, /* → frontend
+
+  COMANDOS PARA USAR EL PROYECTO:
+  ─────────────────────────────────
+  Arrancar todo:
+    docker compose up --build
+
+  Parar todo:
+    docker compose down
+
+  Ver si los contenedores corren:
+    docker ps
+
+  Ver logs del backend:
+    docker logs bicitaxi-backend
+
+  Ver logs del frontend:
+    docker logs bicitaxi-frontend
+
+  Acceder a la BD directamente:
+    docker exec bicitaxi-db psql -U bicitaxi -d bicitaxi_db -c "SELECT * FROM users;"
+
+  URL de la aplicación: http://localhost:8000
+  Usuario admin: admin@bicitaxi.com / admin123
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  FIN DEL DOCUMENTO
+  Si tienes dudas sobre algún concepto, busca en:
+    → https://developer.mozilla.org (MDN Web Docs - en español)
+    → https://docs.docker.com
+    → https://react.dev
+    → https://expressjs.com
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
